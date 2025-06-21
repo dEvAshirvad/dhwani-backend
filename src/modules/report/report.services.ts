@@ -8,28 +8,27 @@ import { WithId } from "mongodb";
 
 export default class ReportServices {
     static async checkPastHighLevelViolations(deviceId: string, limit: number, user: WithId<Document> & { contactNumber: string }) {
-        const reports = await ReportModel.find({ deviceId, violationLevel: "high" }).sort({ createdAt: -1 }).limit(limit);
+        const reports = await ReportModel.find({ deviceId, violationLevel: "high", createdAt: { $gte: new Date(Date.now() - 1000 * 60 * 60 * 12) } }).sort({ createdAt: -1 }).limit(limit); // 12 hours ago
+        console.log(reports);
         if (reports.length >= limit) {
-            const response = await MessageServices.sendSMS({
+            MessageServices.sendSMS({
                 message: `You have been fined for violating the noise level limit. Please pay the fine to avoid further action.`,
                 language: "english",
                 numbers: user.contactNumber,
             });
-            console.log( "High Level Violation", response);
             return true;
         }
         return false;
     }
 
     static async checkPastMediumLevelViolations(deviceId: string, limit: number, user: WithId<Document> & { contactNumber: string }) {
-        const reports = await ReportModel.find({ deviceId, violationLevel: "medium" }).sort({ createdAt: -1 }).limit(limit);
+        const reports = await ReportModel.find({ deviceId, violationLevel: "medium", createdAt: { $gte: new Date(Date.now() - 1000 * 60 * 60 * 12) } }).sort({ createdAt: -1 }).limit(limit); // 12 hours ago
         if (reports.length >= limit) {
-            const response = await MessageServices.sendSMS({
+            MessageServices.sendSMS({
                 message: `It's a warning for you to reduce the noise level. Please reduce the noise level to avoid further action.`,
                 language: "english",
                 numbers: user.contactNumber,
             });
-            console.log( "Medium Level Violation", response);
             return true;
         }
         return false;
@@ -59,11 +58,9 @@ export default class ReportServices {
         console.log(violationLevel);
         switch (violationLevel) {
             case "high":
-                console.log("High Level Violation Initiated");
                 isViolationFined = await this.checkPastHighLevelViolations(deviceId, 3, user);
             case "medium":
-                console.log("Medium Level Violation Initiated");
-                await this.checkPastMediumLevelViolations(deviceId, 3, user);
+                this.checkPastMediumLevelViolations(deviceId, 3, user);
         }
 
         const newReport = await ReportModel.create({
