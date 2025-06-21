@@ -26,7 +26,8 @@ const EnvSchema = z.object({
   COOKIE_DOMAIN: z.string().default("localhost"),
   BETTER_AUTH_SECRET: z.string(),
   BETTER_AUTH_URL: z.string(),
-  RESEND_API_KEY: z.string(),
+  RESEND_API_KEY: z.string().optional(),
+  FAST2SMS_API_KEY: z.string().optional(),
 });
 
 export type env = z.infer<typeof EnvSchema>;

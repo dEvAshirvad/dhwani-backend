@@ -1,4 +1,4 @@
-import express, { Express } from 'express';
+import express from 'express';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
@@ -11,9 +11,9 @@ import router from '@/modules';
 import { auth } from '@/lib/auth';
 import { toNodeHandler } from "better-auth/node";
 import sessionDeserializer from '@/middlewares/session-deserializer';
-import { cache } from '@/middlewares/cache-handler';
+import compression from 'compression';
 
-const allowedOrigins = ['http://localhost:3000'];
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:3030'];
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
@@ -29,6 +29,7 @@ export function createRouter() {
 export default function createApp() {
     const app = createRouter();
   
+    app.use(compression());
     app.use(helmet({
       contentSecurityPolicy: {
         directives: {
@@ -50,26 +51,34 @@ export default function createApp() {
       crossOriginOpenerPolicy: { policy: "unsafe-none" },
     }));
     app.use(cookieParser());
-    app.use(express.json({ limit: '2048mb' }));
-    app.use(express.urlencoded({ extended: true, limit: '2048mb' }));
     app.use(requestLogger());
     app.use(
         cors({
           credentials: true,
           origin: function (origin, callback) {
-            if (!origin || allowedOrigins.includes(origin)) {
+            // Allow requests with no origin (IoT devices, mobile apps, Postman, etc.)
+            if (!origin) {
               callback(null, true);
-            } else {
-              callback(new Error('Not allowed by CORS'));
+              return;
             }
+            
+            // Allow specified origins (your website)
+            if (allowedOrigins.includes(origin)) {
+              callback(null, true);
+              return;
+            }
+            
+            // Reject other origins
+            callback(new Error('Not allowed by CORS'));
           },
         })
       );
     app.use(limiter);
     app.use(serveEmojiFavicon('🔥'));
     app.all("/api/auth/*splat", toNodeHandler(auth));
+     app.use(express.json({ limit: '2048mb' }));
+    app.use(express.urlencoded({ extended: true, limit: '2048mb' }));
     app.use(sessionDeserializer);
-    app.use(cache());
 
     app.get('/', (_, res) => {
         Respond(res, { message: 'API services are nominal!!' }, 200);

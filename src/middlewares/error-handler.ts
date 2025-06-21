@@ -11,7 +11,7 @@ export function errorHandler(
 ) {
   if (error instanceof APIError) {
     Respond(res, error.serializeError(), error.statusCode);
-    next();
+    return;
   }
 
   logger.error(error?.message);
@@ -25,5 +25,4 @@ export function errorHandler(
     },
     500
   );
-  next();
 }

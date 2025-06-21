@@ -7,6 +7,7 @@ export interface IAPIError {
   TITLE: string;
   MESSAGE?: string;
   ERRORS?: ErrorType;
+  META?: Record<string, unknown>;
 }
 
 export interface IErrorData {
@@ -23,6 +24,7 @@ export interface IHttpErrorResponse {
   message?: string;
   success: boolean;
   status: number;
+  meta?: Record<string, unknown>;
   errors: ErrorType;
   timestamp: string;
 }

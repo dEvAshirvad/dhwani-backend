@@ -1,27 +1,41 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { db } from "@/configs/db/mongodb";
-import { openAPI, username, magicLink } from "better-auth/plugins";
-import { resend } from "@/lib/emails/resend";
-import VerifyEmail from "@/lib/emails/verify-email";
+import { admin, openAPI, username } from "better-auth/plugins";
+import { ac, dj, admin as adminRole } from "./permissions";
 
 export const auth = betterAuth({
     emailAndPassword: {  
-        enabled: true
+        enabled: true,
+        disableSignUp: true,
+    },
+    user: {
+        additionalFields: {
+            deviceId: {
+                type: "string",
+                default: null,
+            },
+            contactNumber: {
+                type: "string",
+                default: null,
+            },
+        },
     },
     database: mongodbAdapter(db),
     plugins: [
         openAPI(),
         username(),
-        magicLink({
-          sendMagicLink: async ({ email, token, url }, request) => {
-            await resend.emails.send({
-              from: "Clasher's Academy <no-reply@emails.clashersacademy.com>",
-              to: email,
-              subject: "Magic Link",
-              html: VerifyEmail({url, token, email, request}),
-            });
-          },
-        }),
+        admin({
+            ac,
+            defaultRole: "dj",
+            adminRoles: ["admin"],
+            roles: {
+              dj,
+              admin: adminRole,
+            },
+          }),
+      ],
+      trustedOrigins: [
+        "http://localhost:3000",
       ],
 })

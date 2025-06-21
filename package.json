@@ -10,7 +10,6 @@
     "npm": "please-use-pnpm",
     "pnpm": ">=9.0.0"
   },
-
   "scripts": {
     "dev": "cross-env nodemon src/server.ts",
     "start": "cross-env node dist/server.js",
@@ -31,7 +30,12 @@
       "**/*.ts"
     ]
   },
-  "keywords": ["starter", "template", "express", "nodejs"],
+  "keywords": [
+    "starter",
+    "template",
+    "express",
+    "nodejs"
+  ],
   "author": "@dEvAshirvad",
   "license": "ISC",
   "packageManager": "pnpm@10.4.1",
@@ -39,6 +43,7 @@
     "@antfu/eslint-config": "^4.13.0",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
+    "@types/compression": "^1.8.1",
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.1",
