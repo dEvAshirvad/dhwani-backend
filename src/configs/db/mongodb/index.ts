@@ -2,7 +2,7 @@ import env from '@/env';
 import mongoose from 'mongoose';
 import { MongoClient } from 'mongodb';
 
-const DB_URL = `mongodb://${env.MONGO_INITDB_ROOT_USERNAME}:${env.MONGO_INITDB_ROOT_PASSWORD}@${env.MONGO_HOST}:${env.MONGO_PORT}/${env.MONGO_INITDB_ROOT_DATABASE}${env.NODE_ENV === 'development' ? '?authSource=admin' : ''}`;
+export const DB_URL = `mongodb://${env.MONGO_INITDB_ROOT_USERNAME}:${env.MONGO_INITDB_ROOT_PASSWORD}@${env.MONGO_HOST}:${env.MONGO_PORT}/${env.MONGO_INITDB_ROOT_DATABASE}${env.NODE_ENV === 'development' ? '?authSource=admin' : ''}`;
 
 const client = new MongoClient(DB_URL);
 export const db = client.db();

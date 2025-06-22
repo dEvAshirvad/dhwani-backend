@@ -1,5 +1,5 @@
 import express from 'express';
-import connectDB from '@/configs/db/mongodb';
+import connectDB, { DB_URL } from '@/configs/db/mongodb';
 import logger from '@/configs/logger';
 import env from '@/env';
 import createApp from '@/configs/create-app';
@@ -8,7 +8,7 @@ const app = createApp();
 
 connectDB()
   .then(() => {
-    logger.info('Running Status : Database connected');
+    logger.info('Running Status : Database connected successfully running at ', DB_URL);
   })
   .catch((err) => {
     logger.error('Database Connection Failed', err);

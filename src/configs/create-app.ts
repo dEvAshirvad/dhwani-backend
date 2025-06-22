@@ -13,7 +13,18 @@ import { toNodeHandler } from "better-auth/node";
 import sessionDeserializer from '@/middlewares/session-deserializer';
 import compression from 'compression';
 
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:3030'];
+const allowedOrigins = [
+  'http://localhost:3000', 
+  'http://localhost:3030',
+  // Production domains
+  'https://69.62.77.63',
+  'http://69.62.77.63',
+  // Add your frontend domains here
+  'https://your-frontend-domain.com',
+  'https://www.your-frontend-domain.com',
+  // Add your IoT device domains if needed
+  // 'http://192.168.1.100:8080',
+];
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
