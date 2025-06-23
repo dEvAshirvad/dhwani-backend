@@ -18,6 +18,20 @@ export default class ReportHandler {
       throw error;
     }
   }
+  static async createReportGet(req: Request, res: Response) {
+    try {
+      const { deviceId, soundLevel, latitude, longitude } = req.query as unknown as { deviceId: string, soundLevel: number, latitude: number, longitude: number };
+      const location = latitude && longitude ? { latitude, longitude } : undefined;
+      const result = await ReportServices.createReport({deviceId, soundLevel, location});
+      
+      Respond(res, {
+        message: "Report created successfully",
+        data: result,
+      }, 200);
+    } catch (error) {
+      throw error;
+    }
+  }
   static async getReports(req: Request, res: Response) {
     try {
       const { limit, page, ...query } = req.query as unknown as { limit: number, page: number, query: QueryOptions<QueryReportsSchema> };
