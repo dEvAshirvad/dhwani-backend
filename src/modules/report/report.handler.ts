@@ -3,6 +3,7 @@ import ReportServices from "./report.services";
 import Respond from "@/lib/respond";
 import { QueryReportsSchema, queryReportsSchema, RootZodReportSchema, rootZoReportSchema } from "./report.model";
 import { QueryOptions } from "mongoose";
+import APIError from "@/lib/errors/APIError";
 
 export default class ReportHandler {
   static async createReport(req: Request, res: Response) {
@@ -22,6 +23,51 @@ export default class ReportHandler {
     try {
       const { deviceId, soundLevel, latitude, longitude } = req.query as unknown as { deviceId: string, soundLevel: number, latitude: number, longitude: number };
       const location = latitude && longitude ? { latitude, longitude } : undefined;
+
+      if (!deviceId || !soundLevel) {
+        if (!deviceId) {
+          throw new APIError({
+            STATUS: 400,
+            TITLE: "Bad Request",
+            MESSAGE: "Device ID is required",
+            ERRORS: [
+              {
+                field: "deviceId",
+                message: "Device ID is required",
+              },
+            ],
+          });
+        }
+        if (!soundLevel) {
+          throw new APIError({
+            STATUS: 400,
+            TITLE: "Bad Request",
+            MESSAGE: "Sound level is required",
+            ERRORS: [
+              {
+                field: "soundLevel",
+                message: "Sound level is required",
+              },
+            ],
+          });
+        }
+        throw new APIError({
+          STATUS: 400,
+          TITLE: "Bad Request",
+          MESSAGE: "Device ID and sound level are required",
+          ERRORS: [
+            {
+              field: "deviceId",
+              message: "Device ID is required",
+            },
+            {
+              field: "soundLevel",
+              message: "Sound level is required",
+            },
+          ],
+        });
+      }
+
       const result = await ReportServices.createReport({deviceId, soundLevel, location});
       
       Respond(res, {
