@@ -12,7 +12,6 @@ export const rootZoReportSchema = z.object({
   violationLevel: z.enum(["low", "medium", "high"]),
   isViolationFined: z.boolean(),
   createdAt: z.date(),
-  updatedAt: z.date(),
 });
 
 export const createReportSchema = rootZoReportSchema.omit({
@@ -20,7 +19,6 @@ export const createReportSchema = rootZoReportSchema.omit({
   violationLevel: true,
   isViolationFined: true,
   createdAt: true,
-  updatedAt: true,
 });
 
 export const queryReportsSchema = rootZoReportSchema.extend({
@@ -39,7 +37,8 @@ const reportSchema = new Schema<RootZodReportSchema>({
   deviceId: { type: String, required: true },
   violationLevel: { type: String, required: true, enum: ["low", "medium", "high"] },
   isViolationFined: { type: Boolean, required: true, default: false },
-}, { timestamps: true });
+  createdAt: { type: Date, required: true, default: () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})) },
+});
 
 const ReportModel = model<RootZodReportSchema>("tb_reports", reportSchema);
 
