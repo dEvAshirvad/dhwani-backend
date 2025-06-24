@@ -106,10 +106,21 @@ export default class ReportHandler {
   static async getReports(req: Request, res: Response) {
     try {
       const { limit, page, ...query } = req.query as unknown as { limit: number, page: number, query: QueryOptions<QueryReportsSchema> };
-      const reports = await ReportServices.getReports({ query: query, limit : limit || 10, page : page || 1 });
+      const reports = await ReportServices.getReports({ query: query, limit : limit || 30, page : page || 1 });
       Respond(res, {
         message: "Reports fetched successfully",
         data: reports,
+      }, 200);
+    } catch (error) {
+      throw error;
+    }
+  }
+  static async clearReports(req: Request, res: Response) {
+    try {
+      const result = await ReportServices.clearReports();
+      Respond(res, {
+        message: "Reports cleared successfully",
+        data: result,
       }, 200);
     } catch (error) {
       throw error;

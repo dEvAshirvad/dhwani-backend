@@ -76,11 +76,11 @@ export default class ReportServices {
         throw error;
         }
     }
-    static async getReports({ query, limit, page }: { query: QueryOptions<QueryReportsSchema>, limit: number, page: number }) {
+    static async getReports({ query, limit = 30, page = 1 }: { query: QueryOptions<QueryReportsSchema>, limit: number, page: number }) {
         try {
             const skip = (page - 1) * limit;
             const [ docs, total ] = await Promise.all([
-                ReportModel.find(query).limit(limit).skip(skip),
+                ReportModel.find(query).limit(limit).skip(skip).sort({ createdAt: -1 }),
                 ReportModel.countDocuments(query)
             ]);
             return {
@@ -92,6 +92,14 @@ export default class ReportServices {
                 hasNextPage : page < Math.ceil(total / limit),
                 hasPreviousPage : page > 1,
             };
+        } catch (error) {
+            throw error;
+        }
+    }
+    static async clearReports() {
+        try {
+            const result = await ReportModel.deleteMany({});
+            return result;
         } catch (error) {
             throw error;
         }
