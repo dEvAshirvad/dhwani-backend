@@ -39,6 +39,7 @@ export function createRouter() {
 export default function createApp() {
     const app = createRouter();
   
+    app.use(requestLogger());
     app.use(compression({
       level: 9,
       threshold: 1024 * 1024,
@@ -54,7 +55,6 @@ export default function createApp() {
     app.post('/api/v1/iot/report', ReportHandler.createReport)
     app.get('/api/v1/iot/report', ReportHandler.createReportGet)
 
-    app.use(requestLogger());
     app.use(serveEmojiFavicon('🔥'));
     app.use(limiter);
     app.use(helmet({
