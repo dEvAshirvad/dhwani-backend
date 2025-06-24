@@ -13,6 +13,7 @@ expand(config({
 
 const EnvSchema = z.object({
   NODE_ENV: z.string().default("development"),
+  API_KEY: z.string(),
   PORT: z.coerce.number().default(3030),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("debug"),
   MONGO_INITDB_ROOT_DATABASE: z.string().default("admin"),

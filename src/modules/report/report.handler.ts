@@ -1,79 +1,60 @@
 import { Request, Response } from "express";
 import ReportServices from "./report.services";
 import Respond from "@/lib/respond";
-import { QueryReportsSchema, queryReportsSchema, RootZodReportSchema, rootZoReportSchema } from "./report.model";
+import { QueryReportsSchema } from "./report.model";
 import { QueryOptions } from "mongoose";
-import APIError from "@/lib/errors/APIError";
+import { format } from "date-fns";
+import env from "@/env";
 
 export default class ReportHandler {
   static async createReport(req: Request, res: Response) {
     try {
-      const report = req.body;
-      const result = await ReportServices.createReport(report);
+      const { deviceId, soundLevel, latitude, longitude, apiKey } = req.body as unknown as { deviceId: string, soundLevel: number, latitude: number, longitude: number, apiKey: string };
+      const location = latitude && longitude ? { latitude, longitude } : undefined;
+
+      if (apiKey !== env.API_KEY) {
+        res.status(401).json({ok: 0, message: "Unauthorized API Key is invalid"});
+      }
+
+      if (!deviceId || !soundLevel) {
+        if (!deviceId) {
+          res.status(400).json({ok: 0, message: "Device ID is required"});
+        }
+        if (!soundLevel) {
+          res.status(400).json({ok: 0, message: "Sound level is required"});
+        }
+        res.status(400).json({ok: 0, message: "Device ID and sound level are required"});
+      }
+
+      const result = await ReportServices.createReport({deviceId, soundLevel, location});
       
-      Respond(res, {
-        message: "Report created successfully",
-        data: result,
-      }, 200);
+      res.status(200).json({ok: 1, message: "Report created successfully", created: format(result.createdAt, "yyyy-MM-dd HH:mm:ss")});
     } catch (error) {
       throw error;
     }
   }
   static async createReportGet(req: Request, res: Response) {
     try {
-      const { deviceId, soundLevel, latitude, longitude } = req.query as unknown as { deviceId: string, soundLevel: number, latitude: number, longitude: number };
+      const { deviceId, soundLevel, latitude, longitude, apiKey } = req.query as unknown as { deviceId: string, soundLevel: number, latitude: number, longitude: number, apiKey: string };
       const location = latitude && longitude ? { latitude, longitude } : undefined;
+
+      if (apiKey !== env.API_KEY) {
+        res.status(401).json({ok: 0, message: "Unauthorized API Key is invalid"});
+      }
 
       if (!deviceId || !soundLevel) {
         if (!deviceId) {
-          throw new APIError({
-            STATUS: 400,
-            TITLE: "Bad Request",
-            MESSAGE: "Device ID is required",
-            ERRORS: [
-              {
-                field: "deviceId",
-                message: "Device ID is required",
-              },
-            ],
-          });
+          res.status(400).json({ok: 0, message: "Device ID is required"});
         }
         if (!soundLevel) {
-          throw new APIError({
-            STATUS: 400,
-            TITLE: "Bad Request",
-            MESSAGE: "Sound level is required",
-            ERRORS: [
-              {
-                field: "soundLevel",
-                message: "Sound level is required",
-              },
-            ],
-          });
+          res.status(400).json({ok: 0, message: "Sound level is required"});
         }
-        throw new APIError({
-          STATUS: 400,
-          TITLE: "Bad Request",
-          MESSAGE: "Device ID and sound level are required",
-          ERRORS: [
-            {
-              field: "deviceId",
-              message: "Device ID is required",
-            },
-            {
-              field: "soundLevel",
-              message: "Sound level is required",
-            },
-          ],
-        });
+        res.status(400).json({ok: 0, message: "Device ID and sound level are required"});
       }
 
       const result = await ReportServices.createReport({deviceId, soundLevel, location});
       
-      Respond(res, {
-        message: "Report created successfully",
-        data: result,
-      }, 200);
+      res.status(200).json({ok: 1, message: "Report created successfully", created: format(result.createdAt, "yyyy-MM-dd HH:mm:ss")});
     } catch (error) {
       throw error;
     }

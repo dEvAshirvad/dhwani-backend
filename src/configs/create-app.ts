@@ -12,18 +12,13 @@ import { auth } from '@/lib/auth';
 import { toNodeHandler } from "better-auth/node";
 import sessionDeserializer from '@/middlewares/session-deserializer';
 import compression from 'compression';
+import ReportHandler from '@/modules/report/report.handler';
 
 const allowedOrigins = [
   'http://localhost:3000', 
   'http://localhost:3030',
-  // Production domains
   'https://69.62.77.63',
   'http://69.62.77.63',
-  // Add your frontend domains here
-  'https://your-frontend-domain.com',
-  'https://www.your-frontend-domain.com',
-  // Add your IoT device domains if needed
-  // 'http://192.168.1.100:8080',
 ];
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -33,6 +28,10 @@ const limiter = rateLimit({
     // store: ... , // Redis, Memcached, etc. See below.
   });
 
+const compressionList = [
+  '/api/v1/iot/report',
+]
+
 export function createRouter() {
   return express()
 }
@@ -40,7 +39,27 @@ export function createRouter() {
 export default function createApp() {
     const app = createRouter();
   
-    app.use(compression());
+    app.use(compression({
+      level: 9,
+      threshold: 1024 * 1024,
+      filter: (req, res) => {
+        if (compressionList.includes(req.url)) {
+          return true;
+        }
+        return false;
+      }
+    })); // for compression to all routes
+    
+    app.use(requestLogger());
+    app.use(serveEmojiFavicon('🔥'));
+    app.use(limiter);
+    app.use(express.json({ limit: '2048mb' }));
+    app.use(express.urlencoded({ extended: true, limit: '2048mb' }));
+
+    app.post('/api/v1/iot/report', ReportHandler.createReport)
+    app.get('/api/v1/iot/report', ReportHandler.createReportGet)
+
+    app.use(compression()); // for compression to all routes
     app.use(helmet({
       contentSecurityPolicy: {
         directives: {
@@ -62,7 +81,6 @@ export default function createApp() {
       crossOriginOpenerPolicy: { policy: "unsafe-none" },
     }));
     app.use(cookieParser());
-    app.use(requestLogger());
     app.use(
         cors({
           credentials: true,
@@ -83,12 +101,8 @@ export default function createApp() {
             callback(new Error('Not allowed by CORS'));
           },
         })
-      );
-    app.use(limiter);
-    app.use(serveEmojiFavicon('🔥'));
+    );
     app.all("/api/auth/*splat", toNodeHandler(auth));
-     app.use(express.json({ limit: '2048mb' }));
-    app.use(express.urlencoded({ extended: true, limit: '2048mb' }));
     app.use(sessionDeserializer);
 
     app.get('/', (_, res) => {
