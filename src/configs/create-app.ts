@@ -40,6 +40,29 @@ export default function createApp() {
     const app = createRouter();
   
     app.use(requestLogger());
+    app.use(
+      cors({
+        credentials: true,
+        origin: function (origin, callback) {
+          // Allow requests with no origin (IoT devices, mobile apps, Postman, etc.)
+          if (!origin) {
+            callback(null, true);
+            return;
+          }
+          
+          // Allow specified origins (your website)
+          if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+            return;
+          }
+          
+          // Reject other origins
+          callback(new Error('Not allowed by CORS'));
+        },
+      })
+  );
+    app.all("/api/auth/*splat", toNodeHandler(auth));
+
     app.use(compression({
       level: 9,
       threshold: 1024 * 1024,
@@ -78,28 +101,7 @@ export default function createApp() {
       crossOriginOpenerPolicy: { policy: "unsafe-none" },
     }));
     app.use(cookieParser());
-    app.use(
-        cors({
-          credentials: true,
-          origin: function (origin, callback) {
-            // Allow requests with no origin (IoT devices, mobile apps, Postman, etc.)
-            if (!origin) {
-              callback(null, true);
-              return;
-            }
-            
-            // Allow specified origins (your website)
-            if (allowedOrigins.includes(origin)) {
-              callback(null, true);
-              return;
-            }
-            
-            // Reject other origins
-            callback(new Error('Not allowed by CORS'));
-          },
-        })
-    );
-    app.all("/api/auth/*splat", toNodeHandler(auth));
+    
     app.use(sessionDeserializer);
 
     app.get('/', (_, res) => {

@@ -1,7 +1,7 @@
 import ReportModel, { CreateReportSchema, QueryReportsSchema } from "./report.model";
 import { db } from "@/configs/db/mongodb";
 import APIError from "@/lib/errors/APIError";
-import { QueryOptions } from "mongoose";
+import { QueryOptions, Types } from "mongoose";
 import MessageServices from "../message/message.services";
 import { UserWithRole } from "better-auth/plugins";
 import { WithId } from "mongodb";
@@ -42,7 +42,7 @@ export default class ReportServices {
        
 
         // Find User by deviceId
-        const user: WithId<Document> & { contactNumber: string } | null = await db.collection("user").findOne({ deviceId }) as WithId<Document> & { contactNumber: string } | null;
+        const user: WithId<Document> & { contactNumber: string, name: string } | null = await db.collection("user").findOne({ deviceId }) as WithId<Document> & { contactNumber: string, name: string } | null;
 
         if (!user) {
             throw new APIError({
@@ -71,7 +71,10 @@ export default class ReportServices {
         });
 
         
-        return newReport;
+        return {
+            ...newReport.toObject(),
+            vendorName : user.name,
+        };
         } catch (error) {
         throw error;
         }
@@ -83,8 +86,17 @@ export default class ReportServices {
                 ReportModel.find(query).limit(limit).skip(skip).sort({ createdAt: -1 }),
                 ReportModel.countDocuments(query)
             ]);
+
+            const users = await db.collection("user").find({ _id: { $in: docs.map(doc => new Types.ObjectId(doc.userId)) } }).toArray();
+
+            const docsWithUsers = docs.map(doc => ({
+                ...doc.toObject(),
+                vendorName : users.find(user => user._id.toString() === doc.userId)?.name,
+                user : users.find(user => user._id.toString() === doc.userId),
+            }));
+
             return {
-                docs,
+                docs : docsWithUsers,
                 total,
                 page,
                 limit,
