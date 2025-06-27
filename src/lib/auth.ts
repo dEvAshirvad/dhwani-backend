@@ -3,6 +3,7 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { db } from "@/configs/db/mongodb";
 import { admin, openAPI, username } from "better-auth/plugins";
 import { ac, dj, admin as adminRole } from "./permissions";
+import env from "@/env";
 
 export const auth = betterAuth({
     emailAndPassword: {  
@@ -35,6 +36,12 @@ export const auth = betterAuth({
             },
           }),
       ],
+      advanced: {
+        crossSubDomainCookies: {
+            enabled: true,
+            domain: env.COOKIE_DOMAIN,
+        },
+    },
       trustedOrigins: [
         "http://localhost:3000",
       ],
