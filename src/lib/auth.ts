@@ -37,6 +37,7 @@ export const auth = betterAuth({
           }),
       ],
       advanced: {
+        cookiePrefix: "dhwani",
         crossSubDomainCookies: {
             enabled: true,
             domain: env.COOKIE_DOMAIN,

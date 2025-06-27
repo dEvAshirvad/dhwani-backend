@@ -22,25 +22,25 @@ export default class MessageServices {
             urlencoded.append("numbers", validatedInput.numbers);
             urlencoded.append("flash", "1");
 
-            // const response = await fetch("https://www.fast2sms.com/dev/bulkV2", {
-            //     method: "POST",
-            //     headers: {
-            //         "authorization": env.FAST2SMS_API_KEY || "",
-            //         "Content-Type": "application/x-www-form-urlencoded"
-            //     },
-            //     body: urlencoded,
-            //     redirect: "follow"
-            // });
+            const response = await fetch("https://www.fast2sms.com/dev/bulkV2", {
+                method: "POST",
+                headers: {
+                    "authorization": env.FAST2SMS_API_KEY || "",
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: urlencoded,
+                redirect: "follow"
+            });
 
-            // if (!response.ok) {
-            //     throw new Error(`SMS API Error: ${response.statusText}`);
-            // }
-
-            // return await response.json();
-            return {
-                ok: 1,
-                message: "SMS sent successfully"
+            if (!response.ok) {
+                throw new Error(`SMS API Error: ${response.statusText}`);
             }
+
+            return await response.json();
+            // return {
+            //     ok: 1,
+            //     message: "SMS sent successfully"
+            // }
         } catch (error) {
             if (error instanceof z.ZodError) {
                 throw new Error(`Validation Error: ${error.errors.map(e => e.message).join(", ")}`);
