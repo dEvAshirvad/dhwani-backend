@@ -126,4 +126,27 @@ export default class ReportHandler {
       throw error;
     }
   }
+  static async getDashboardData(req: Request, res: Response) {
+    try {
+      const result = await ReportServices.getDashboardData();
+      Respond(res, {
+        message: "Dashboard data fetched successfully",
+        data: result,
+      }, 200);
+    } catch (error) {
+      throw error;
+    }
+  }
+  static async getVendorReports(req: Request, res: Response) {
+    try {
+      const { limit, page, ...query } = req.query as unknown as { limit: number, page: number, query: any };
+      const result = await ReportServices.getVendorReports({ query: query, limit : Number(limit) || 30, page : Number(page) || 1 });
+      Respond(res, {
+        message: "Vendor reports fetched successfully",
+        data: result,
+      }, 200);
+    } catch (error) {
+      throw error;
+    }
+  }
 }
