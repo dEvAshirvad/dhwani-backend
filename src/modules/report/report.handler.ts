@@ -5,6 +5,8 @@ import { QueryReportsSchema } from "./report.model";
 import { QueryOptions } from "mongoose";
 import { format } from "date-fns";
 import env from "@/env";
+import APIError from "@/lib/errors/APIError";
+import { HttpErrorStatusCode } from "@/types/errors/errors.types";
 
 export default class ReportHandler {
   static async createReport(req: Request, res: Response) {
