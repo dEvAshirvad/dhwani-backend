@@ -6,9 +6,15 @@ import MessageServices from "../message/message.services";
 import { UserWithRole } from "better-auth/plugins";
 import { WithId } from "mongodb";
 
+// Utility function to get IST time
+const getISTTime = () => {
+  return new Date(Date.now() + (5.5 * 60 * 60 * 1000)); // Add 5.5 hours for IST
+};
+
 export default class ReportServices {
     static async checkPastHighLevelViolations(deviceId: string, limit: number, user: WithId<Document> & { contactNumber: string }) {
-        const reports = await ReportModel.find({ deviceId, violationLevel: "high", createdAt: { $gte: new Date(Date.now() - 1000 * 60 * 60 * 12) } }).sort({ createdAt: -1 }).limit(limit); // 12 hours ago
+        const twelveHoursAgo = new Date(Date.now() - (12 * 60 * 60 * 1000) + (5.5 * 60 * 60 * 1000)); // 12 hours ago in IST
+        const reports = await ReportModel.find({ deviceId, violationLevel: "high", createdAt: { $gte: twelveHoursAgo } }).sort({ createdAt: -1 }).limit(limit);
         console.log(reports);
         if (reports.length >= limit) {
             MessageServices.sendSMS({
@@ -22,7 +28,8 @@ export default class ReportServices {
     }
 
     static async checkPastMediumLevelViolations(deviceId: string, limit: number, user: WithId<Document> & { contactNumber: string }) {
-        const reports = await ReportModel.find({ deviceId, violationLevel: "medium", createdAt: { $gte: new Date(Date.now() - 1000 * 60 * 60 * 12) } }).sort({ createdAt: -1 }).limit(limit); // 12 hours ago
+        const twelveHoursAgo = new Date(Date.now() - (12 * 60 * 60 * 1000) + (5.5 * 60 * 60 * 1000)); // 12 hours ago in IST
+        const reports = await ReportModel.find({ deviceId, violationLevel: "medium", createdAt: { $gte: twelveHoursAgo } }).sort({ createdAt: -1 }).limit(limit);
         if (reports.length >= limit) {
             MessageServices.sendSMS({
                 message: `It's a warning for you to reduce the noise level. Please reduce the noise level to avoid further action.`,
@@ -68,6 +75,7 @@ export default class ReportServices {
             violationLevel,
             isViolationFined,
             userId : user._id.toString(),
+            createdAt: getISTTime(),
         });
 
         

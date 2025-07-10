@@ -43,6 +43,7 @@ export default class ReportHandler {
 
       const result = await ReportServices.createReport({deviceId, soundLevel, location});
       
+      // Response with IST time (already stored in IST)
       res.status(200).json({ok: 1, message: "Report created successfully", created: format(result.createdAt, "yyyy-MM-dd HH:mm:ss")});
       return;
     } catch (error) {
