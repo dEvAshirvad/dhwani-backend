@@ -3,7 +3,6 @@ import { db } from "@/configs/db/mongodb";
 import APIError from "@/lib/errors/APIError";
 import { QueryOptions, Types } from "mongoose";
 import MessageServices from "../message/message.services";
-import { UserWithRole } from "better-auth/plugins";
 import { WithId } from "mongodb";
 
 // Utility function to get IST time
