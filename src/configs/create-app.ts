@@ -18,6 +18,7 @@ const allowedOrigins = [
   'http://localhost:3000', 
   'http://localhost:3030',
   'http://69.62.77.63:3030',
+  'http://69.62.77.63:80'
 ];
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
