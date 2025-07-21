@@ -17,8 +17,7 @@ import ReportHandler from '@/modules/report/report.handler';
 const allowedOrigins = [
   'http://localhost:3000', 
   'http://localhost:3030',
-  'https://69.62.77.63',
-  'http://69.62.77.63',
+  'http://69.62.77.63:3030',
 ];
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
