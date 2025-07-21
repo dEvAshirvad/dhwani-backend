@@ -39,7 +39,7 @@ export function createRouter() {
 export default function createApp() {
     const app = createRouter();
   
-    app.use(requestLogger());
+    
     app.use(
       cors({
         credentials: true,
@@ -78,30 +78,9 @@ export default function createApp() {
     app.post('/api/v1/iot/report', ReportHandler.createReport)
     app.get('/api/v1/iot/report', ReportHandler.createReportGet)
 
-    app.use(serveEmojiFavicon('🔥'));
+    app.use(requestLogger());
     app.use(limiter);
-    app.use(helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'", "'unsafe-inline'", "data:", "https:", "http:"],
-          scriptSrc: ["'self'", "'unsafe-inline'", "data:", "https:", "http:"],
-          styleSrc: ["'self'", "'unsafe-inline'", "data:", "https:", "http:"],
-          imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
-          connectSrc: ["'self'", ...allowedOrigins, "https:", "http:", "ws:", "wss:"],
-          fontSrc: ["'self'", "https:", "http:", "data:"],
-          objectSrc: ["'none'"],
-          mediaSrc: ["'self'", "data:", "https:", "http:"],
-          frameSrc: ["'self'", "data:", "https:", "http:"],
-          workerSrc: ["'self'", "blob:"],
-          childSrc: ["'self'", "blob:"],
-        },
-      },
-      crossOriginEmbedderPolicy: false,
-      crossOriginResourcePolicy: { policy: "cross-origin" },
-      crossOriginOpenerPolicy: { policy: "unsafe-none" },
-    }));
     app.use(cookieParser());
-    
     app.use(sessionDeserializer);
 
     app.get('/', (_, res) => {
